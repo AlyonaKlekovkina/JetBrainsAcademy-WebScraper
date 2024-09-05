@@ -1,0 +1,11 @@
+import requests
+
+print('Input the URL:')
+url = input()
+headers = {'Accept': 'application/json'}
+response = requests.get(url, headers=headers)
+info = response.json()
+if info['status'] == 200:
+    print(info['joke'])
+else:
+    print('Invalid resource!')
