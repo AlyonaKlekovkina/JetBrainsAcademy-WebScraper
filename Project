@@ -1,20 +1,12 @@
 import requests
-from bs4 import BeautifulSoup
 
 print('Input the URL:')
 url = input()
-r = requests.get(url, headers={'Accept-Language': 'en-US,en;q=0.5'})
-if r.status_code == 200 and 'articles' in url:
-    soup = BeautifulSoup(r.content, 'html.parser')
-    p1 = soup.find('title')
-    title = p1.text
-    p2 = soup.find('meta', {'name': 'description'})
-    description = p2.get('content')
-    result = {
-        "title": title,
-        "description": description
-    }
-    print(result)
-else:
-    print('Invalid page!')
+r = requests.get(url, headers={'Accept': 'application/json'})
+file = open('source.html', 'w', encoding='utf-8')
+if r.status_code == 200:
+    file.write(r.text)
+    print('Content saved.')
 
+else:
+    print('The URL returned {}!'.format(r.status_code))
