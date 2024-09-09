@@ -1,12 +1,47 @@
 import requests
+from bs4 import BeautifulSoup
 
-print('Input the URL:')
-url = input()
-r = requests.get(url, headers={'Accept': 'application/json'})
-file = open('source.html', 'w', encoding='utf-8')
-if r.status_code == 200:
-    file.write(r.text)
-    print('Content saved.')
 
-else:
-    print('The URL returned {}!'.format(r.status_code))
+def create_body_content(list_of_links, list_of_titles):
+    for i in range(len(list_of_links)):
+        article_title = list_of_titles[i]
+        r = requests.get(list_of_links[i], headers={'Accept-Language': 'en-US,en;q=0.5'})
+        if r.status_code == 200:
+            file = open(article_title, 'w', encoding='utf-8')
+            soup = BeautifulSoup(r.content, 'html.parser')
+            article_body = soup.find_all('p')
+            for i in article_body:
+                file.write(i.text)
+            file.close()
+        else:
+            return 'The URL returned {}!'.format(r.status_code)
+    return list_of_titles
+
+
+def filter_type_news():
+    link_list = []
+    title_list = []
+    url = 'https://www.nature.com/nature/articles?sort=PubDate&year=2020&page=3'
+    r = requests.get(url, headers={'Accept-Language': 'en-US,en;q=0.5'})
+    if r.status_code == 200:
+        soup = BeautifulSoup(r.content, 'html.parser')
+        filtered_news = soup.find_all('span', {'data-test': 'article.type'})
+        for i in filtered_news:
+            if i.text == 'News':
+                create_link = i.parent.parent.parent.findChildren('a', {'data-track-action': "view article"})
+                for i in create_link:
+                    href = i.get('href')
+                    title = i.text
+                    name = title.replace('.', '').replace(',', '').replace('?', '').replace("'", "").replace(':', '').replace('-', '').replace(' ', '_')
+                    file_name = '{}.txt'.format(name)
+                    title_list.append(file_name)
+                    article_link = 'https://www.nature.com/nature{}'.format(href)
+                    link_list.append(article_link)
+        return link_list, title_list
+    else:
+        return 'The URL returned {}!'.format(r.status_code)
+
+
+all_links = filter_type_news()
+the_body = create_body_content(all_links[0], all_links[1])
+print("Saved articles:", the_body)
