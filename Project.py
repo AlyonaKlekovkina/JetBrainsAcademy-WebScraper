@@ -10,7 +10,6 @@ def create_body_content(list_of_links, list_of_titles, list_of_pages):
         r = requests.get(list_of_links[i], headers={'Accept-Language': 'en-US,en;q=0.5'})
         if r.status_code == 200:
             path = folder_name
-            os.makedirs(path, exist_ok=True)
             file = open(path + '/' + article_title, 'w', encoding='utf-8')
             soup = BeautifulSoup(r.content, 'html.parser')
             article_body = soup.find_all('p', {'class': 'article__teaser'})
@@ -26,9 +25,11 @@ def filter_type_news(article_type, number_of_pages):
     link_list = []
     title_list = []
     pages_list = []
-    for i in range(number_of_pages):
-        url = 'https://www.nature.com/nature/articles?sort=PubDate&year=2020&page={}'.format(i+1)
-        page = 'Page_{}'.format(i+1)
+    for i in range(1, number_of_pages + 1):
+        url = 'https://www.nature.com/nature/articles?sort=PubDate&year=2020&page={}'.format(i)
+        page = 'Page_{}'.format(i)
+        path = page
+        os.makedirs(path, exist_ok=True)
         r = requests.get(url, headers={'Accept-Language': 'en-US,en;q=0.5'})
         if r.status_code == 200:
             soup = BeautifulSoup(r.content, 'html.parser')
